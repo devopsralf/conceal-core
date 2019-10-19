@@ -35,6 +35,8 @@ struct WalletRecordDto {
   SecretKey spendSecretKey;
   uint64_t pendingBalance = 0;
   uint64_t actualBalance = 0;
+  uint64_t actualDepositBalance = 0;
+  uint64_t pendingDepositBalance = 0;
   uint64_t creationTimestamp = 0;
 };
 
@@ -109,6 +111,8 @@ void serialize(WalletRecordDto& value, CryptoNote::ISerializer& serializer) {
   serializer(value.spendSecretKey, "spend_secret_key");
   serializer(value.pendingBalance, "pending_balance");
   serializer(value.actualBalance, "actual_balance");
+  serializer(value.actualDepositBalance, "actual_deposit_balance");
+  serializer(value.pendingDepositBalance, "pending_deposit_balance");
   serializer(value.creationTimestamp, "creation_timestamp");
 }
 
@@ -277,6 +281,8 @@ WalletSerializer::WalletSerializer(
   SecretKey& viewSecretKey,
   uint64_t& actualBalance,
   uint64_t& pendingBalance,
+  uint64_t& actualDepositBalance,
+  uint64_t& pendingDepositBalance,
   WalletsContainer& walletsContainer,
   TransfersSyncronizer& synchronizer,
   UnlockTransactionJobs& unlockTransactions,
@@ -290,6 +296,8 @@ WalletSerializer::WalletSerializer(
   m_viewSecretKey(viewSecretKey),
   m_actualBalance(actualBalance),
   m_pendingBalance(pendingBalance),
+  m_actualDepositBalance(actualDepositBalance),
+  m_pendingDepositBalance(pendingDepositBalance),
   m_walletsContainer(walletsContainer),
   m_synchronizer(synchronizer),
   m_unlockTransactions(unlockTransactions),
@@ -386,6 +394,8 @@ void WalletSerializer::saveWallets(Common::IOutputStream& destination, bool save
     dto.spendSecretKey = w.spendSecretKey;
     dto.pendingBalance = saveCache ? w.pendingBalance : 0;
     dto.actualBalance = saveCache ? w.actualBalance : 0;
+    dto.actualDepositBalance = saveCache ? w.actualDepositBalance : 0;
+    dto.pendingDepositBalance = saveCache ? w.pendingDepositBalance : 0;
     dto.creationTimestamp = static_cast<uint64_t>(w.creationTimestamp);
 
     serializeEncrypted(dto, "", cryptoContext, destination);
@@ -396,11 +406,19 @@ void WalletSerializer::saveWallets(Common::IOutputStream& destination, bool save
 void WalletSerializer::saveBalances(Common::IOutputStream& destination, bool saveCache, CryptoContext& cryptoContext) {
   uint64_t actual = saveCache ? m_actualBalance : 0;
   uint64_t pending = saveCache ? m_pendingBalance : 0;
+  uint64_t actualdep = saveCache ? m_actualDepositBalance : 0;
+  uint64_t pendingdep = saveCache ? m_pendingDepositBalance : 0;
 
   serializeEncrypted(actual, "actual_balance", cryptoContext, destination);
   cryptoContext.incIv();
 
   serializeEncrypted(pending, "pending_balance", cryptoContext, destination);
+  cryptoContext.incIv();
+
+  serializeEncrypted(actualdep, "actual_deposit_balance", cryptoContext, destination);
+  cryptoContext.incIv();
+
+  serializeEncrypted(pendingdep, "pending_deposit_balance", cryptoContext, destination);
   cryptoContext.incIv();
 }
 
@@ -589,6 +607,8 @@ void WalletSerializer::loadWalletV1Keys(CryptoNote::BinaryInputStreamSerializer&
   wallet.spendSecretKey = keys.spendSecretKey;
   wallet.actualBalance = 0;
   wallet.pendingBalance = 0;
+  wallet.actualDepositBalance = 0;
+  wallet.pendingDepositBalance = 0;
   wallet.creationTimestamp = static_cast<time_t>(keys.creationTimestamp);
 
   m_walletsContainer.get<RandomAccessIndex>().push_back(wallet);
@@ -689,6 +709,8 @@ void WalletSerializer::loadWallets(Common::IInputStream& source, CryptoContext& 
     wallet.spendSecretKey = dto.spendSecretKey;
     wallet.actualBalance = dto.actualBalance;
     wallet.pendingBalance = dto.pendingBalance;
+    wallet.actualDepositBalance = dto.actualDepositBalance;
+    wallet.pendingDepositBalance = dto.pendingDepositBalance;
     wallet.creationTimestamp = static_cast<time_t>(dto.creationTimestamp);
     wallet.container = reinterpret_cast<CryptoNote::ITransfersContainer*>(i); //dirty hack. container field must be unique
 
@@ -724,6 +746,12 @@ void WalletSerializer::loadBalances(Common::IInputStream& source, CryptoContext&
   cryptoContext.incIv();
 
   deserializeEncrypted(m_pendingBalance, "pending_balance", cryptoContext, source);
+  cryptoContext.incIv();
+
+  deserializeEncrypted(m_actualDepositBalance, "actual_deposit_balance", cryptoContext, source);
+  cryptoContext.incIv();
+
+  deserializeEncrypted(m_pendingDepositBalance, "pending_deposit_balance", cryptoContext, source);
   cryptoContext.incIv();
 }
 
@@ -805,6 +833,8 @@ void WalletSerializer::resetCachedBalance() {
     m_walletsContainer.modify(it, [](WalletRecord& wallet) {
       wallet.actualBalance = 0;
       wallet.pendingBalance = 0;
+      wallet.actualDepositBalance = 0;
+      wallet.pendingDepositBalance = 0;
     });
   }
 }

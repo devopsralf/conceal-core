@@ -30,6 +30,8 @@ struct WalletRecord {
   CryptoNote::ITransfersContainer* container = nullptr;
   uint64_t pendingBalance = 0;
   uint64_t actualBalance = 0;
+  uint64_t actualDepositBalance = 0;
+  uint64_t pendingDepositBalance = 0;
   time_t creationTimestamp;
 };
 

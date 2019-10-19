@@ -712,6 +712,38 @@ std::error_code WalletService::getBalance(uint64_t& availableBalance, uint64_t& 
   return std::error_code();
 }
 
+std::error_code WalletService::getDepositBalance(const std::string& address, uint64_t& availableDepositBalance, uint64_t& lockedDepositAmount) {
+  try {
+    System::EventLock lk(readyEvent);
+    logger(Logging::DEBUGGING) << "Getting deposit balance for address " << address;
+
+    availableDepositBalance = wallet.getActualDepositBalance(address);
+    lockedDepositAmount = wallet.getPendingBalance(address); //TODO Update Pending Deposit
+  } catch (std::system_error& x) {
+    logger(Logging::WARNING) << "Error while getting deposit balance: " << x.what();
+    return x.code();
+  }
+
+  logger(Logging::DEBUGGING) << address << " actual deposit balance: " << availableDepositBalance << ", pending deposit: " << lockedDepositAmount;
+  return std::error_code();
+}
+
+std::error_code WalletService::getDepositBalance(uint64_t& availableDepositBalance, uint64_t& lockedDepositAmount) {
+  try {
+    System::EventLock lk(readyEvent);
+    logger(Logging::DEBUGGING) << "Getting deposit wallet balance";
+
+    availableDepositBalance = wallet.getActualDepositBalance();
+    lockedDepositAmount = wallet.getPendingBalance(); //TODO Update Pending Deposit
+  } catch (std::system_error& x) {
+    logger(Logging::WARNING) << "Error while getting deposit balance: " << x.what();
+    return x.code();
+  }
+
+  logger(Logging::DEBUGGING) << "Wallet actual deposit balance: " << availableDepositBalance << ", pending deposit: " << lockedDepositAmount;
+  return std::error_code();
+}
+
 std::error_code WalletService::getBlockHashes(uint32_t firstBlockIndex, uint32_t blockCount, std::vector<std::string>& blockHashes) {
   try {
     System::EventLock lk(readyEvent);

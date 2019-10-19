@@ -1378,7 +1378,9 @@ void simple_wallet::synchronizationProgressUpdated(uint32_t current, uint32_t to
 
 bool simple_wallet::show_balance(const std::vector<std::string>& args/* = std::vector<std::string>()*/) {
   success_msg_writer() << "available balance: " << m_currency.formatAmount(m_wallet->actualBalance()) <<
-    ", locked amount: " << m_currency.formatAmount(m_wallet->pendingBalance());
+    ", locked amount: " << m_currency.formatAmount(m_wallet->pendingBalance()) <<
+    ", available deposit amount: " << m_currency.formatAmount(m_wallet->actualDepositBalance()) <<
+    ", locked deposit amount: " << m_currency.formatAmount(m_wallet->pendingDepositBalance());
 
   return true;
 }

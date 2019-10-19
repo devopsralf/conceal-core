@@ -219,6 +219,8 @@ WalletGreen::WalletGreen(System::Dispatcher& dispatcher, const Currency& currenc
   m_state(WalletState::NOT_INITIALIZED),
   m_actualBalance(0),
   m_pendingBalance(0),
+  m_actualDepositBalance(0),
+  m_pendingDepositBalance(0),
   m_transactionSoftLockTime(transactionSoftLockTime)
 {
   m_upperTransactionSizeLimit = m_currency.transactionMaxSize();
@@ -306,6 +308,8 @@ void WalletGreen::clearCaches() {
   m_uncommitedTransactions.clear();
   m_actualBalance = 0;
   m_pendingBalance = 0;
+  m_actualDepositBalance = 0;
+  m_pendingDepositBalance = 0;
   m_fusionTxsCache.clear();
   m_blockchain.clear();
 }
@@ -360,6 +364,8 @@ void WalletGreen::unsafeSave(std::ostream& destination, bool saveDetails, bool s
     m_viewSecretKey,
     m_actualBalance,
     m_pendingBalance,
+    m_actualDepositBalance,
+    m_pendingDepositBalance,
     m_walletsContainer,
     m_synchronizer,
     m_unlockTransactionsJob,
@@ -404,6 +410,8 @@ void WalletGreen::unsafeLoad(std::istream& source, const std::string& password) 
     m_viewSecretKey,
     m_actualBalance,
     m_pendingBalance,
+    m_actualDepositBalance,
+    m_pendingDepositBalance,
     m_walletsContainer,
     m_synchronizer,
     m_unlockTransactionsJob,
@@ -598,6 +606,9 @@ void WalletGreen::deleteAddress(const std::string& address) {
   m_actualBalance -= it->actualBalance;
   m_pendingBalance -= it->pendingBalance;
 
+  m_actualDepositBalance -= it->actualDepositBalance;
+  m_pendingDepositBalance -= it->pendingDepositBalance;
+
   m_synchronizer.removeSubscription(pubAddr);
 
   deleteContainerFromUnlockTransactionJobs(it->container);
@@ -634,6 +645,21 @@ uint64_t WalletGreen::getActualBalance(const std::string& address) const {
   return wallet.actualBalance;
 }
 
+uint64_t WalletGreen::getActualDepositBalance(const std::string& address) const {
+  throwIfNotInitialized();
+  throwIfStopped();
+
+  const auto& wallet = getWalletRecord(address);
+  return wallet.actualDepositBalance; //NEEDS TO GET DEPOSIT BALANCE
+}
+
+uint64_t WalletGreen::getActualDepositBalance() const {
+  throwIfNotInitialized();
+  throwIfStopped();
+
+  return m_actualDepositBalance; //NEEDS TO GET DEPOSIT BALANCE
+}
+
 uint64_t WalletGreen::getPendingBalance() const {
   throwIfNotInitialized();
   throwIfStopped();
@@ -647,6 +673,21 @@ uint64_t WalletGreen::getPendingBalance(const std::string& address) const {
 
   const auto& wallet = getWalletRecord(address);
   return wallet.pendingBalance;
+}
+
+uint64_t WalletGreen::getPendingDepositBalance() const {
+  throwIfNotInitialized();
+  throwIfStopped();
+
+  return m_pendingDepositBalance;
+}
+
+uint64_t WalletGreen::getPendingDepositBalance(const std::string& address) const {
+  throwIfNotInitialized();
+  throwIfStopped();
+
+  const auto& wallet = getWalletRecord(address);
+  return wallet.pendingDepositBalance;
 }
 
 size_t WalletGreen::getTransactionCount() const {
@@ -1977,6 +2018,7 @@ void WalletGreen::updateBalance(CryptoNote::ITransfersContainer* container) {
 
   uint64_t actual = container->balance(ITransfersContainer::IncludeAllUnlocked);
   uint64_t pending = container->balance(ITransfersContainer::IncludeAllLocked);
+  uint64_t actdep = container->balance(ITransfersContainer::IncludeTypeDeposit); //TODO LOOK INTO THIS
 
   if (it->actualBalance < actual) {
     m_actualBalance += actual - it->actualBalance;

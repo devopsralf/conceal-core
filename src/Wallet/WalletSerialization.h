@@ -32,6 +32,8 @@ public:
     Crypto::SecretKey& viewSecretKey,
     uint64_t& actualBalance,
     uint64_t& pendingBalance,
+    uint64_t& actualDepositBalance,
+    uint64_t& pendingDepositBalance,
     WalletsContainer& walletsContainer,
     TransfersSyncronizer& synchronizer,
     UnlockTransactionJobs& unlockTransactions,
@@ -98,6 +100,8 @@ private:
   Crypto::SecretKey& m_viewSecretKey;
   uint64_t& m_actualBalance;
   uint64_t& m_pendingBalance;
+  uint64_t& m_actualDepositBalance;
+  uint64_t& m_pendingDepositBalance;
   WalletsContainer& m_walletsContainer;
   TransfersSyncronizer& m_synchronizer;
   UnlockTransactionJobs& m_unlockTransactions;

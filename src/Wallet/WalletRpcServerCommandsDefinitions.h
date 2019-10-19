@@ -29,12 +29,17 @@ using CryptoNote::ISerializer;
     {
       uint64_t locked_amount;
       uint64_t available_balance;
+      uint64_t available_deposit_balance; //TODO MOVE THIS TO ITS OWN RPC CALL
+      uint64_t locked_deposit_balance;
       uint64_t balance;            //<! \deprecated Use locked_amount + available_balance
       uint64_t unlocked_balance;   //<! \deprecated Use available_balance
+      
 
       void serialize(ISerializer& s) {
         KV_MEMBER(locked_amount)
         KV_MEMBER(available_balance)
+        KV_MEMBER(available_deposit_balance)
+        KV_MEMBER(locked_deposit_balance)
         KV_MEMBER(balance)
         KV_MEMBER(unlocked_balance)
       }

@@ -139,6 +139,21 @@ struct GetBalance {
   };
 };
 
+struct GetDepositBalance {
+  struct Request {
+    std::string address;
+
+    void serialize(CryptoNote::ISerializer& serializer);
+  };
+
+  struct Response {
+    uint64_t availableDepositBalance;
+    uint64_t lockedDepositAmount;
+
+    void serialize(CryptoNote::ISerializer& serializer);
+  };
+};
+
 struct GetBlockHashes {
   struct Request {
     uint32_t firstBlockIndex;

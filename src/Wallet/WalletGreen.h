@@ -53,6 +53,11 @@ public:
   virtual uint64_t getPendingBalance() const override;
   virtual uint64_t getPendingBalance(const std::string& address) const override;
 
+  virtual uint64_t getActualDepositBalance() const override;
+  virtual uint64_t getActualDepositBalance(const std::string& address) const override;
+  virtual uint64_t getPendingDepositBalance() const override;
+  virtual uint64_t getPendingDepositBalance(const std::string& address) const override;
+
   virtual size_t getTransactionCount() const override;
   virtual WalletTransaction getTransaction(size_t transactionIndex) const override;
   virtual size_t getTransactionTransferCount(size_t transactionIndex) const override;
@@ -309,6 +314,9 @@ std::vector<OutputToTransfer> pickRandomFusionInputs(const std::vector<std::stri
 
   uint64_t m_actualBalance;
   uint64_t m_pendingBalance;
+
+  uint64_t m_actualDepositBalance;
+  uint64_t m_pendingDepositBalance;
 
   uint64_t m_upperTransactionSizeLimit;
   uint32_t m_transactionSoftLockTime;

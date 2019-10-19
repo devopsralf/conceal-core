@@ -44,6 +44,7 @@ PaymentServiceJsonRpcServer::PaymentServiceJsonRpcServer(System::Dispatcher& sys
   handlers.emplace("deleteAddress", jsonHandler<DeleteAddress::Request, DeleteAddress::Response>(std::bind(&PaymentServiceJsonRpcServer::handleDeleteAddress, this, std::placeholders::_1, std::placeholders::_2)));
   handlers.emplace("getSpendKeys", jsonHandler<GetSpendKeys::Request, GetSpendKeys::Response>(std::bind(&PaymentServiceJsonRpcServer::handleGetSpendKeys, this, std::placeholders::_1, std::placeholders::_2)));
   handlers.emplace("getBalance", jsonHandler<GetBalance::Request, GetBalance::Response>(std::bind(&PaymentServiceJsonRpcServer::handleGetBalance, this, std::placeholders::_1, std::placeholders::_2)));
+  handlers.emplace("getDepositBalance", jsonHandler<GetDepositBalance::Request, GetDepositBalance::Response>(std::bind(&PaymentServiceJsonRpcServer::handleGetDepositBalance, this, std::placeholders::_1, std::placeholders::_2)));
   handlers.emplace("getBlockHashes", jsonHandler<GetBlockHashes::Request, GetBlockHashes::Response>(std::bind(&PaymentServiceJsonRpcServer::handleGetBlockHashes, this, std::placeholders::_1, std::placeholders::_2)));
   handlers.emplace("getTransactionHashes", jsonHandler<GetTransactionHashes::Request, GetTransactionHashes::Response>(std::bind(&PaymentServiceJsonRpcServer::handleGetTransactionHashes, this, std::placeholders::_1, std::placeholders::_2)));
   handlers.emplace("getTransactions", jsonHandler<GetTransactions::Request, GetTransactions::Response>(std::bind(&PaymentServiceJsonRpcServer::handleGetTransactions, this, std::placeholders::_1, std::placeholders::_2)));
@@ -149,6 +150,14 @@ std::error_code PaymentServiceJsonRpcServer::handleGetBalance(const GetBalance::
     return service.getBalance(request.address, response.availableBalance, response.lockedAmount);
   } else {
     return service.getBalance(response.availableBalance, response.lockedAmount);
+  }
+}
+
+std::error_code PaymentServiceJsonRpcServer::handleGetDepositBalance(const GetDepositBalance::Request& request, GetDepositBalance::Response& response) {
+  if (!request.address.empty()) {
+    return service.getDepositBalance(request.address, response.availableDepositBalance, response.lockedDepositAmount);
+  } else {
+    return service.getDepositBalance(response.availableDepositBalance, response.lockedDepositAmount);
   }
 }
 

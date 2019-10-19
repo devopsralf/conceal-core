@@ -147,6 +147,11 @@ public:
   virtual uint64_t getPendingBalance() const = 0;
   virtual uint64_t getPendingBalance(const std::string& address) const = 0;
 
+  virtual uint64_t getActualDepositBalance() const = 0;
+  virtual uint64_t getActualDepositBalance(const std::string& address) const = 0;
+  virtual uint64_t getPendingDepositBalance() const = 0;
+  virtual uint64_t getPendingDepositBalance(const std::string& address) const = 0;
+
   virtual size_t getTransactionCount() const = 0;
   virtual WalletTransaction getTransaction(size_t transactionIndex) const = 0;
   virtual size_t getTransactionTransferCount(size_t transactionIndex) const = 0;
